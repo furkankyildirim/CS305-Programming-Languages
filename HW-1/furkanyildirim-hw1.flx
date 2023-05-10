@@ -1,0 +1,110 @@
+/*Token Names*/
+tIDENT [\"][a-zA-Z_][a-zA-Z0-9_]*[\"]
+tSTRING [\'][^\']*[\']
+tNUMBER [\+\-]*[0-9]+
+tFLOAT ^[\+\-]*[0-9]+[.][0-9]+
+tPLUS \"\+\"
+tMINUS \"\-\"
+tMUL \"\*\"
+tDIV \"\/\"
+tCOMMA ","
+tEQUALITY \"==\"
+tINC \"\+\+\"
+tDEC \"\-\-\"
+tLBRAC \[
+tRBRAC \]
+tGT \">\"
+tLT \"<\"
+tGEQ \">=\"
+tLEQ \"<=\"
+tGET \"Get\"
+tSET \"Set\"
+tPRINT \"Print\"
+tFOR \"For\"
+tIF \"If\"
+tFUNCTION \"Function\"
+tRETURN \"Return\"
+
+tNEWLINE \n
+tSPACE " "
+
+/*Implementations*/
+%{
+int Line = 1, OldLine = 1;
+
+char* RemoveQuotes(char* str) {
+    int i, j;
+    OldLine = Line;
+    char* new_str = (char*)malloc(strlen(str) * sizeof(char));
+    for (i = 0, j = 0; i < strlen(str); i++) {
+        if (str[i] != '\'' && str[i] != '\"') {
+            if (str[i] == '\n')  Line++;
+
+            new_str[j] = str[i];
+            j++;
+        }
+    }
+    new_str[j] = '\0';
+    return new_str;
+}
+
+char* RemoveZeros(char* in){
+    float number = atof(in);
+    char* str = (char*)malloc(100 * sizeof(char));
+    sprintf(str, "%f", number);
+    int i = strlen(str) - 1;
+    while (str[i] == '0') {
+        str[i] = '\0';
+        i--;
+    }
+
+    if (str[i] == '.') {
+        str[i+1] = '0';
+    }
+    return str;
+}
+
+%}
+
+%%
+
+{tGET}      printf("%d tGET\n", Line);
+{tSET}      printf("%d tSET\n", Line);
+{tPRINT}    printf("%d tPRINT\n", Line);
+{tFOR}      printf("%d tFOR\n", Line);
+{tIF}       printf("%d tIF\n", Line);
+{tFUNCTION} printf("%d tFUNCTION\n", Line);
+{tRETURN}   printf("%d tRETURN\n", Line);
+
+{tIDENT}    printf("%d tIDENT (%s)\n", Line, RemoveQuotes(yytext));
+{tSTRING}   printf("%d tSTRING (%s)\n", OldLine, RemoveQuotes(yytext));
+{tNUMBER}   printf("%d tNUM (%s) (%d)\n", Line, yytext, atoi(yytext));
+{tFLOAT}    printf("%d tNUM (%s) (%s)\n", Line, yytext, RemoveZeros(yytext));
+
+{tPLUS}     printf("%d tPLUS\n", Line);
+{tMINUS}    printf("%d tMINUS\n", Line);
+{tMUL}      printf("%d tMUL\n", Line);
+{tDIV}      printf("%d tDIV\n", Line);
+
+{tCOMMA}    printf("%d tCOMMA\n", Line);
+{tEQUALITY} printf("%d tEQUALITY\n", Line);
+{tINC}      printf("%d tINC\n", Line);
+{tDEC}      printf("%d tDEC\n", Line);
+{tLBRAC}    printf("%d tLBRAC\n", Line);
+{tRBRAC}    printf("%d tRBRAC\n", Line);
+{tGT}       printf("%d tGT\n", Line);
+{tLT}       printf("%d tLT\n", Line);
+{tGEQ}      printf("%d tGEQ\n", Line);
+{tLEQ}      printf("%d tLEQ\n", Line);
+
+{tNEWLINE}   Line++; 
+{tSPACE}    ;
+.           printf("%d ILLEGAL CHARACTER (%s)\n", Line, yytext);
+
+
+%%
+int main()
+{
+    yylex();
+    return 0;
+}
